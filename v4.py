@@ -11,6 +11,14 @@ def generate_and_save_plot_of_raw_camera_values(avg_positions, file_name):
     if not avg_positions:
         print("No average positions logged.")
         return
+    
+    valid_indices = [i for i, pos in enumerate(avg_positions)]
+    if not valid_indices:
+        print("No valid data positions logged.")
+        return
+
+    first_valid_index = valid_indices[0]
+    last_valid_index = valid_indices[-1]
 
     time_steps = list(range(len(avg_positions)))
     avg_x_positions = [pos[0] for pos in avg_positions]
@@ -28,8 +36,9 @@ def generate_and_save_plot_of_raw_camera_values(avg_positions, file_name):
     plt.legend()
     plt.grid(True)
 
-    # Changing the following line would ruin logic in the video of the graph
+    # Changing the following line would ruin logic in the video of the graph, and adjust the limits on x axis
     plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
+    plt.xlim(first_valid_index, last_valid_index)
 
     plt.savefig(file_name)
     print(f"Plot saved as {file_name}")
@@ -42,9 +51,10 @@ def overlay_graph_on_frame(frame, graph, frame_number, total_frames):
     frame[y_offset:y_offset+graph_resized.shape[0], x_offset:x_offset+graph_resized.shape[1]] = graph_resized
 
     # Assuming margins are about 10% of the graph image on each side
-    buffer_percentage = 0.1
-    buffer_size_horizontal = int(buffer_percentage * graph_resized.shape[1])
-    buffer_size_vertical = int(buffer_percentage * graph_resized.shape[0])
+    buffer_percentage_horizontal = 0.10
+    buffer_percentage_vertical = 0.10
+    buffer_size_horizontal = int(buffer_percentage_horizontal * graph_resized.shape[1])
+    buffer_size_vertical = int(buffer_percentage_vertical * graph_resized.shape[0])
 
     # Adjust the position to start at the beginning of the actual plot area
     adjusted_graph_width = graph_resized.shape[1] - 2 * buffer_size_horizontal
@@ -158,6 +168,8 @@ def track_ball_grayscale_and_position(save_video):
     
     if(save_video):
         add_graph_to_video(base_root+'/video.avi', base_root+'/with average.png', base_root+'/final_output.avi')
+        add_graph_to_video(base_root+'/video.avi', base_root+'/complete_tracking_data.png', base_root+'/final_output_no_smoothing.avi')
+
 
 
 
